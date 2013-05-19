@@ -13,7 +13,7 @@ def exactPolyKernel(x_m, x_t, dim):
 
 
 def polyKernel(x_m, x_t, dim):
-    product = (np.dot(x_m, x_t) + 1) ** dim
+    product = (np.dot(x_m, np.transpose(x_t)) + 1) ** dim
     return product
 
 

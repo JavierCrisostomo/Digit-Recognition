@@ -32,14 +32,17 @@ def main():
     output = sys.argv[3]
 
     loadTrainData()
-    #loadTestData()
+    loadTestData()
 
-    trainer = Train.Trainer()
-    #trainer.processData(train_data, "./model/parsed_train_data")
-    #trainer.loadProcessedData("./model/parsed_train_data")
-    #trainer.trainModel()
-    svm = SVM.SVM(train_data, 0, kernel=Kernels.exactPolyKernel, dim=5, report=True)
-    svm.train_svm()
+    #trainer = Train.Trainer()
+    #trainer.processData(train_data, output_file="./model/parsed_train_data")
+    #trainer.trainModel(report=True)
+    svm = SVM.SVM(train_data, regularization=0, kernel=Kernels.polyKernel, dim=5, report=True)
+    tester = Test.TestModel()
+    model = svm.trainModel()
+    predictions = tester.predictWithModel(model, test_data)
+    error = tester.calculateLoss(predictions, test_data[:, 0])
+    print float(error) / len(test_data)
 
 if __name__ == "__main__":
     main()
