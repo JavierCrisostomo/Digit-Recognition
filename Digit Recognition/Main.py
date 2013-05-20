@@ -34,15 +34,18 @@ def main():
     loadTrainData()
     loadTestData()
 
+    # TODO this is just for testing and will eventually be cleaned up
+
     #trainer = Train.Trainer()
     #trainer.processData(train_data, output_file="./model/parsed_train_data")
     #trainer.trainModel(report=True)
-    svm = SVM.SVM(train_data, regularization=0, kernel=Kernels.polyKernel, dim=5, report=True)
+    svm = SVM.Classifier()
     tester = Test.TestModel()
-    model = svm.trainModel()
+    kernel = Kernels.exactPolyKernel(5)
+    model = svm.trainModel(train_data, penalty=1, kernel=kernel, report=True)
     predictions = tester.predictWithModel(model, test_data)
-    error = tester.calculateLoss(predictions, test_data[:, 0])
-    print float(error) / len(test_data)
+    # error = tester.calculateLoss(predictions, test_data[:, 0])
+    # print float(error) / len(test_data)
 
 if __name__ == "__main__":
     main()

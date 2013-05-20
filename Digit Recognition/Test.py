@@ -3,10 +3,11 @@ __author__ = 'bdwalker'
 import KNN
 import SVM
 
+
 class TestModel:
 
     def predictWithModel(self, model, test_data, report=False):
-        svm = SVM.SVM()
+        svm = SVM.Classifier()
         predictions = svm.testWithModel(test_data[:, 1:], model)
         return predictions
 
