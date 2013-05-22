@@ -12,3 +12,5 @@
 *.pyc
 
 Digit Recognition/model/parsed_train_data
+
+Digit Recognition/model/processed_train
