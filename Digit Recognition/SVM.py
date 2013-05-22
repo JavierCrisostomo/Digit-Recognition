@@ -9,7 +9,7 @@ class Classifier:
 
     # Helper method to calculate the regularization to apply to the weight update.
     # Currently using the derivative of the l2 norm (Just the sums of the weights
-    # multiplied by their label.
+    # multiplied by their label).
     # TODO  I am not confident this is correct
     def calculateRegularization(self, mistakes):
         product = np.sum(np.multiply(np.atleast_2d(mistakes[:, 0]).T, mistakes[:, 1:]))
@@ -80,7 +80,7 @@ class Classifier:
 
     # Trains the SVM model using the data passed in as x_data.  It will return
     # a trained model that can be used for making predictions on test data.  The
-    # method all accepts an integer representing the penalty to assign to the margin,
+    # method accepts an integer representing the penalty to assign to the margin,
     # the kernel, if any, to be used to map the data to a higher dimension, a step size
     # eta and a boolean to indicate if the average loss should be printed during training.
     def trainModel(self, x_data, penalty=1, kernel=Kernels.defaultKernel(),
