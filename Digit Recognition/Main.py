@@ -11,6 +11,7 @@ train_input = None
 test_input = None
 train_data = None
 test_data = None
+test_y = None
 
 
 def loadTrainData():
@@ -19,8 +20,9 @@ def loadTrainData():
 
 
 def loadTestData():
-    global test_data, test_input
+    global test_data, test_input, test_y
     test_data = np.loadtxt(test_input, delimiter=",", skiprows=1)
+    test_y = np.loadtxt("./data/knn_benchmark.csv")
 
 
 def main():
@@ -28,7 +30,7 @@ def main():
         print "usage: train_file test_file output_directory"
         quit()
 
-    global train_input, test_input, output, y, test_data
+    global train_input, test_input, output, y, test_data, test_y
     train_input = sys.argv[1]
     test_input = sys.argv[2]
     output = sys.argv[3]
@@ -49,15 +51,19 @@ def main():
     # model = svm.trainModel(train_data, penalty=1, kernel=kernel, report=True)
     # predictions = tester.predictWithModel(model, test_data)
 
-    knn = KNN.KNN()
-    knn.initializeKNN(train_data, 5)
-    
-    for i in range(0,len(test_data)):
-        x_row = test_data[i, :]
-        knn.classifySample(x_row)
-        print "Classified"
-        
+    output = open("./data/output.txt", "w+")
 
+    knn = KNN.KNN(train_data, 1)
+    classifications = list()
+    for i in range(0, len(test_data)):
+        x_row = test_data[i, :]
+        classifications.append(knn.classifySample(x_row))
+        print "Correct Classification: %d Our Classification: %d" % (test_y[i], classifications[-1])
+        output.write(str(classifications[-1]) + "\n")
+
+    result = sum([np.sign(x) for x in np.subtract(test_y, classifications)])
+    print result
+    output.close()
     # error = tester.calculateLoss(predictions, test_data[:, 0])
     # print float(error) / len(test_data)
 
