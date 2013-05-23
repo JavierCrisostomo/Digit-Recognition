@@ -1,0 +1,75 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{nips12submit_e,times}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+%\documentstyle[nips12submit_09,times,art10]{article} % For LaTeX 2.09
+
+
+\title{Exploration of Digit Recognition Algorithms}
+
+
+\author{
+Harnoor Singh \\
+Department of Computer Science \& Engineering\\
+University of Washington \\
+\texttt{hsingh@cs.washington.edu} \\
+\And
+Brian Walker \\
+Department of Computer Science \& Engineering \\
+University of Washington \\
+\texttt{bdwalker@cs.washington.edu} \\
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+\maketitle
+
+\section{Objective}
+
+As described in our project proposal, we are using the Kaggle digit dataset to classify written numbers.
+
+Our goal is to implement digit recognition using K Nearest Neighbors (KNN) and a Support Vector Machine (SVM) and compare the two approaches. A stretch objective is to enable data that isn't a part of the Kaggle dataset to work with our algorithms. This would require some form of normalization in the input image for consistency.
+
+\section{Progress}
+
+\subsection{KNN}
+
+We have made significant progress in both the KNN algorithm and the SVM algorithm. Our KNN algorithm is completely implemented as is cross validation for it. 
+
+To compute the K nearest neighbors, we take the euclidean difference between the feature we are classifying, $X_1$, and every feature in our training set.
+
+\begin{center}
+$\sum\limits_{X_2 \exists N} {(X1 - X2)^2}$
+\end{center}
+
+Once we have calculated the K closest features, a simple voting method is used to classify $X_1$.
+
+In order to select a value of K we do cross validation on a subset of the training set. We begin by passing a list of potential K values we are considering. For each item, $K_i$ in this list, we hold out $K_i$ samples from our training set and construct our classifier. We then attempt to classify the $K_i$ samples and record the error rate. 
+
+The K value that led to the lowest error rate is used to build our final classifier.
+
+\subsection{SVM}
+
+TODO
+
+\begingroup
+\renewcommand{\section}[2]{}%
+%\renewcommand{\chapter}[2]{}% for other classes
+\bibliographystyle{unsrt}
+\bibliography{references}	
+\endgroup
+
+
+\end{document}

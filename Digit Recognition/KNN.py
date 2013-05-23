@@ -42,6 +42,8 @@ class KNN:
         return classification
 
     # Store the model in a dictionary
+    # train_data is a matrix of where the first column holds the 
+    # Y values and the other columns are features.
     def __init__(self, train_data, k=1, report=True):
         self.k = k
         self.train_data = train_data
