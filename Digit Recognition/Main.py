@@ -5,6 +5,7 @@ import Test
 import Train
 import sys
 import Kernels
+from multiprocessing.pool import Pool
 
 output = None
 train_input = None
@@ -53,13 +54,17 @@ def main():
 
     output = open("./data/output.txt", "w+")
 
-    knn = KNN.KNN(train_data, 1)
+
     classifications = list()
+    pool = Pool(processes=4)
+    results = list()
     for i in range(0, len(test_data)):
+        knn = KNN.KNN(train_data, 1)
         x_row = test_data[i, :]
-        classifications.append(knn.classifySample(x_row))
-        print "Correct Classification: %d Our Classification: %d" % (test_y[i], classifications[-1])
-        output.write(str(classifications[-1]) + "\n")
+        results.append(pool.apply(knn.classifySample, x_row))
+
+    for result in results:
+        print result.get()
 
     result = sum([np.sign(x) for x in np.subtract(test_y, classifications)])
     print result
