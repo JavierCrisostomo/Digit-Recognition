@@ -64,20 +64,19 @@ def main():
     # KNN DRIVER
     #
     # Cross validation
-    k = cv.crossValidate([1,2,3,4,5,10,15,20], train_data[0:1000,)
+
+    k = cv.crossValidate([1,2,3,4,5,10,15,20], 10, train_data[0:10000])
     output = open("./data/output.txt", "w+")
     
     knn = KNN.KNN(train_data, k)
     classifications = list()
-    pool = Pool(processes=4)
     results = list()
     for i in range(0, len(test_data)):
         knn = KNN.KNN(train_data, 1)
         x_row = test_data[i, :]
-        results.append(pool.apply(knn.classifySample, x_row))
+        results.append(knn.classifySample, x_row)
 
-    for result in results:
-        print result.get()
+
 
     result = sum([np.sign(x) for x in np.subtract(test_y, classifications)])
     print result
