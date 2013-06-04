@@ -6,20 +6,28 @@ import Kernels
 
 
 class Classifier:
-    weights = None
 
+    # Helper method to calculate the regularization to apply to the weight update.
+    # Currently using the derivative of the l2 norm (Just the sums of the weights
+    # multiplied by their label).
+    # TODO  I am not confident this is correct
+    def calculateRegularization(self, mistakes):
+        product = np.sum(np.multiply(np.atleast_2d(mistakes[:, 0]).T, mistakes[:, 1:]))
+        return product
 
     # Method that will make a prediction based on the kernel passed, the array of
     # mistakes made up to the current time step and the current observation.  It will
     # return either a 1 or a -1, indicating which class the current observation is
     # predicted to belong to.
-    def update(self, x, mistakes, kernel):
+    def predict(self, x, mistakes, C, eta, kernel):
         mistake_y = mistakes[:, 0]
         mistake_x = mistakes[:, 1:]
+        weight = self.calculateRegularization(mistakes)
 
         # sign(C * sum_j(y * k(x_j, x_t)) - 2 w)
-        self.weights += 1/(np.apply_along_axis(kernel, 1, mistake_x, mistake_x)) * (1 - (mistake_y * np.dot(self.weights, mistake_y * np.apply_along_axis(
-            kernel, 1, mistake_x, x))))
+        prediction = np.sign(C * np.sum((2 - mistake_y) * np.apply_along_axis(
+            kernel, 1, mistake_x, x)) - 2 * weight)
+        return prediction
 
     # Method to train the model.  It accepts as arguments and ndarray of training data,
     # an ndarray of their corresponding labels, the penalty constant, the kernel to use
@@ -27,14 +35,14 @@ class Classifier:
     # during training (true if so, false otherwise). It will return an ndarray of all the
     # mistakes made during predictions that can be used for making predictions against
     # testing data.
-    def _trainSVM(self, X, y, report, kernel):
+    def _trainSVM(self, X, y, C, eta, report, kernel):
         mistakes = np.zeros((1, len(X[0]) + 1))
         avgLoss = 0.0
 
         # loop over all samples
         for i in range(0, len(X)):
             x = X[i, :]
-            prediction = self.update(x, mistakes, kernel)
+            prediction = self.predict(x, mistakes, C, eta, kernel)
 
             # if prediction is incorrect, store it in mistakes array
             if prediction * y[i] <= 0:
@@ -78,8 +86,6 @@ class Classifier:
     def trainModel(self, x_data, penalty=1, kernel=Kernels.defaultKernel(),
                    eta=1, report=False):
 
-        # +1 for intercept
-        self.weights = [0] * (x_data.shape[1] + 1)
         y = x_data[:, 0]
 
         # add a column of ones for the intercept

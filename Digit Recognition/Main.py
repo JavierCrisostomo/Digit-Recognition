@@ -1,93 +1,120 @@
-import numpy as np
-import SVM
 import KNN
-import Test
 import Train
 import sys
 import Kernels
-from multiprocessing.pool import Pool
 import KNNCrossValidation as cv
+import numpy as np
 
 
-output = None
-train_input = None
-test_input = None
-train_data = None
-test_data = None
-test_y = None
-version = None
+def loadTrainData(input_file):
+    return np.loadtxt(input_file, delimiter=",", skiprows=1)
 
 
-def loadTrainData():
-    global train_data, train_input, y
-    train_data = np.loadtxt(train_input, delimiter=",", skiprows=1)
+def loadTestData(test_file, true_label=None):
+    print test_file
+    test_data = np.loadtxt(test_file, delimiter=",", skiprows=1)
+    test_y = None
+    if true_label is not None:
+        print true_label
+        test_y = np.loadtxt(true_label, delimiter=",", skiprows=1)
+    return test_data, test_y
+
+def runSVM():
+    trainer = Train.Trainer()
+    trainer.processData(train_data, None, "./trained_model.csv")
+    kernel = Kernels.exactPolyKernel(5)
+    trainer.trainModel(kernel, True, False, "./trained_model.csv")
+    pass
+
+def runKNNCV(input_file, output, folds):
+    train_data = loadTrainData(input_file)
+    k = cv.KNNCrossValidation([1, 2, 3, 4, 5, 10, 15, 20], folds, train_data)
+
+    if output is not None:
+        out = open(output, "w")
+        out.write(str(k))
+        out.close()
 
 
-def loadTestData():
-    global test_data, test_input, test_y, version
-    test_data = np.loadtxt(test_input, delimiter=",", skiprows=1)
-    if version.upper() == "SVM":
-        test_y = np.loadtxt("./data/knn_benchmark.csv")
+def runKNN(train_file, test_file, true_label, output_file, k):
+    train_data = loadTrainData(train_file)
+    test_data, test_y = loadTestData(test_file, true_label)
+    test_data = test_data[:, 1:]
+    output = open(output_file, "w")
 
+    knn = KNN.Classifier(train_data, k)
+    results = list()
+
+    for i in range(0, test_data.shape[0]):
+        x_row = test_data[i, :]
+        classified = knn.classifySample(x_row)
+        results.append(str(classified))
+
+    output.writelines(results)
+    output.close()
+
+    print results
+
+
+def printUsage():
+
+    print "usage: \n" \
+          "KNN function train_file output_directory [test_file] [test_y] [k_value] [number_of_folds]\n" \
+          "     function = cv (cross validate), test\n" \
+          "     output_direct = location to write results\n" \
+          "     test_file (optional if function = cv)\n" \
+          "     test_y = results file for test (optional if function = cv)" \
+          "     k_value (optional if function = cv)\n" \
+          "     number_of_folds = folds to use for cross validation (optional if function = test)\n\n" \
+          "" \
+          "SVM function train_file output_directory [test_file] [kernel] [number_of_folds]\n" \
+          "     function = cv (cross validate), train, test\n" \
+          "     train_file = data to train the classifier with\n" \
+          "     output_directory = location to write results\n" \
+          "     test_file (optional if function = cv, train\n" \
+          "     kernel = kernel used with SVM (optional if function = cv)\n" \
+          "     number_of_folds = folds to use for cross validation (optional if function = train, test) \n"
+    sys.exit(1)
 
 def main():
-    if len(sys.argv) < 5 or (sys.argv[4] != "KNN" and sys.argv[4] != "SVM"):
-        print "usage: train_file test_file output_directory version"
-        quit()
+    if len(sys.argv) < 5:
+        printUsage()
 
-    global train_input, test_input, output, y, test_data, test_y, version
-    train_input = sys.argv[1]
-    test_input = sys.argv[2]
-    output = sys.argv[3]
-    version = sys.argv[4]
+    method = sys.argv[1].lower()
+    func = sys.argv[2].lower()
+    train_file = sys.argv[3]
+    output_file = sys.argv[4]
 
-    loadTrainData()
-    loadTestData()
+    try:
+        if method == "svm":
+            if func == "train":
+                pass
+            elif func == "test":
+                pass
+            elif func == "cv":
+                pass
+            else:
+                printUsage()
 
-    # TODO this is just for testing and will eventually be cleaned up
+        elif method == "knn":
+            if func == "train":
+                printUsage()
+            elif func == "test":
+                test_file = sys.argv[5]
+                label_file = sys.argv[6]
+                k = int(sys.argv[7])
+                runKNN(train_file, test_file, label_file, output_file, k)
+            elif func == "cv":
+                num_folds = int(sys.argv[5])
+                runKNNCV(train_file, output_file, num_folds)
+            else:
+                printUsage()
 
-    #trainer = Train.Trainer()
-    #trainer.processData(train_data, output_file="./model/parsed_train_data")
-    #trainer.trainModel(report=True)
+        else:
+            printUsage()
+    except IndexError as e:
+        printUsage()
 
-
-    ####################################
-    # SVM DRIVER
-    # svm = SVM.Classifier()
-    # tester = Test.TestModel()
-    # kernel = Kernels.exactPolyKernel(5)
-    # model = svm.trainModel(train_data, penalty=1, kernel=kernel, report=True)
-    # predictions = tester.predictWithModel(model, test_data)
-    ####################################
-
-    ####################################
-    # KNN DRIVER
-    #
-    # Cross validation
-
-    k = cv.crossValidate([1,2,3,4,5,10,15,20], 10, train_data[0:10000])
-    output = open("./data/output.txt", "w+")
-    
-    knn = KNN.KNN(train_data, k)
-    classifications = list()
-    results = list()
-    for i in range(0, len(test_data)):
-        knn = KNN.KNN(train_data, 1)
-        x_row = test_data[i, :]
-        results.append(knn.classifySample, x_row)
-
-
-
-    result = sum([np.sign(x) for x in np.subtract(test_y, classifications)])
-    print result
-    output.close()
-    ######################################
-
-    #k = cv.crossValidate([1,2,3,4,5,10,15,20], train_data[0:1000,])
-
-
-    # error = tester.calculateLoss(predictions, test_data[:, 0])
-    # print float(error) / len(test_data)
 
 if __name__ == "__main__":
     main()

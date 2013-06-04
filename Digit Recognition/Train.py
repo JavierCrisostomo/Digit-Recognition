@@ -5,6 +5,7 @@ import SVM
 import Kernels
 import sys
 import multiprocessing.pool as mp
+import multiprocessing
 
 
 class Trainer:
@@ -17,19 +18,23 @@ class Trainer:
 
     # Separate data into buckets, keyed by the label
     def processData(self, raw_data, output_file=None, input_file=None):
+        train_data = None
         if input_file is None:
+            if output_file is not None:
+                output = open(output_file, "w+")
+
             print "***** Separating Data Into Classes..."
             train_data = self.loadClasses(raw_data)
 
             # serialize
             if output_file is not None:
                 print "***** Serializing Data to %s" % output_file
-                output = open(output_file, "w+")
                 pickle.dump(train_data, output)
 
         else:
             print "***** Loading Data From %s" % input_file
-            self.loadProcessedData(input_file)
+            input = open(input_file, "r")
+            train_data = pickle.load(input)
 
         print "***** Combining Classes for Training"
         self.processed_data = self.combineClasses(train_data)
@@ -66,7 +71,7 @@ class Trainer:
 
         return pairings
 
-    def trainModel(self, kernel=Kernels.defaultKernel, sigma=0, report=False, plot=False, output=None):
+    def trainModel(self, kernel=Kernels.defaultKernel, report=False, plot=False, output=None):
         if self.processed_data is None:
             print "Training data has not been loaded! \n " \
                   "Must load data with a call to processData or loadProcessedData."
@@ -74,24 +79,25 @@ class Trainer:
 
         # go get some lunch, this is gonna take some time
         threads = dict()
-        pool = mp.ThreadPool(processes=1)
+        cores = multiprocessing.cpu_count()
+        pool = mp.ThreadPool(processes=cores)
         for couple in self.processed_data.keys():
-            arg = (self.processed_data[couple], kernel, sigma, report, plot)
+            arg = (self.processed_data[couple], kernel, report, plot)
             result = pool.apply_async(self.trainSingleClass, arg)
             threads[couple] = result
 
         trained_model = dict()
-        for thread in threads.keys():
-            trained_model[thread] = threads[thread].get()
+        for r in threads.keys():
+            trained_model[r] = threads[r].get()
 
         #serialize trained model
         if output is not None:
             out = open(output, "w+")
             pickle.dump(trained_model, out)
 
-    def trainSingleClass(self, data, kernel, sigma, report, plot):
-        svm = SVM.SVM(x_data=data, kernel=kernel, regularization=sigma, report=report)
-        return svm.runClassifier()
+    def trainSingleClass(self, data, kernel, report, plot):
+        svm = SVM.Classifier()
+        return svm.trainModel(data, 1, kernel, 1, report)
 
 
 

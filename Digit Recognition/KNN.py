@@ -5,7 +5,7 @@ import heapq
 import operator
 
 
-class KNN:
+class Classifier:
     train_data = None
     k = 0
     report = False
@@ -25,8 +25,8 @@ class KNN:
         tupleList = list()
         for i in range(len(difference)):
             tupleList.append((difference[i], i))
-            
-        smallest = heapq.nsmallest(self.k, tupleList)
+
+        smallest = heapq.nsmallest(int(self.k), tupleList)
 
         neighbors = dict()
         for j in range(len(smallest)):
@@ -45,7 +45,6 @@ class KNN:
     # train_data is a matrix of where the first column holds the 
     # Y values and the other columns are features.
     def __init__(self, train_data, k=1, report=True):
-        print(train_data.shape)
         self.k = k
         self.train_data = train_data
         self.report = report
