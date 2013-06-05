@@ -9,7 +9,6 @@ import numpy as np
 def loadTrainData(input_file):
     return np.loadtxt(input_file, delimiter=",", skiprows=1)
 
-
 def loadTestData(test_file, true_label=None):
     print test_file
     #test_data = np.loadtxt(test_file, delimiter=",", skiprows=0)
@@ -29,18 +28,17 @@ def runSVM():
 
 def runKNNCV(input_file, output, folds):
     train_data = loadTrainData(input_file)
-    k = cv.KNNCrossValidation([1, 2, 3, 4, 5, 10, 15, 20], folds, train_data)
+    k = cv.crossValidation([1,2,3,4,5,10,15,20], folds, train_data)
 
     if output is not None:
         out = open(output, "w")
         out.write(str(k))
         out.close()
 
-def runKNN(train_file, test_file, true_label, output_file, k, weighted):
+def runKNN(train_file, test_file, output_file, k, weighted):
     train_data = loadTrainData(train_file)
-    test_data, test_y = loadTestData(test_file, true_label)
+    test_data, test_y = loadTestData(test_file, None)
     test_data = test_data[:]
-    #test_data = test_data[:, 1:]
     output = open(output_file, "w")
 
     knn = KNN.Classifier(train_data, k, weighted)
@@ -55,19 +53,18 @@ def runKNN(train_file, test_file, true_label, output_file, k, weighted):
     output.close()
 
     print results
-    print true_label
-
 
 def printUsage():
 
     print "usage: \n" \
-          "KNN function train_file output_directory [test_file] [test_y] [k_value] [number_of_folds]\n" \
+          "KNN function train_file output_directory [test_file] [test_y] [k_value] [number_of_folds] [weight=true/false]\n" \
           "     function = cv (cross validate), test, weighted \n" \
           "     output_direct = location to write results\n" \
           "     test_file (optional if function = cv)\n" \
           "     test_y = results file for test (optional if function = cv)" \
           "     k_value (optional if function = cv)\n" \
           "     number_of_folds = folds to use for cross validation (optional if function = test)\n\n" \
+          "     weight true/false if we want to run with weights" \
           "" \
           "SVM function train_file output_directory [test_file] [kernel] [number_of_folds]\n" \
           "     function = cv (cross validate), train, test\n" \
@@ -103,14 +100,9 @@ def main():
                 printUsage()
             elif func == "test":
                 test_file = sys.argv[5]
-                label_file = sys.argv[6]
-                k = int(sys.argv[7])
-                runKNN(train_file, test_file, label_file, output_file, k, False)
-            elif func == "weighted":
-                test_file = sys.argv[5]
-                label_file = sys.argv[6]
-                k = int(sys.argv[7])
-                runKNN(train_file, test_file, label_file, output_file, k, True)
+                k = int(sys.argv[6])
+                weighted = bool(sys.argv[7])
+                runKNN(train_file, test_file, output_file, k, weighted)
             elif func == "cv":
                 num_folds = int(sys.argv[5])
                 runKNNCV(train_file, output_file, num_folds)
