@@ -1,5 +1,4 @@
 __author__ = 'harnoor'
-
 import numpy as np
 import heapq
 import operator
@@ -9,6 +8,7 @@ class Classifier:
     train_data = None
     k = 0
     report = False
+    weighted = False
 
     # Takes the euclidean distance between x and y
     def euclideanDistance(x1, x2):
@@ -32,7 +32,8 @@ class Classifier:
         for j in range(len(smallest)):
             index = smallest[j][1]
             if trainY[index] in neighbors:
-                neighbors[trainY[index]] += 1
+                
+                neighbors[trainY[index]] += (1/distanceFunction(x, trainX[index]))*1
             else:
                 neighbors[trainY[index]] = 1
         classification = max(neighbors.iteritems(), key=operator.itemgetter(1))[0]
@@ -44,8 +45,9 @@ class Classifier:
     # Store the model in a dictionary
     # train_data is a matrix of where the first column holds the 
     # Y values and the other columns are features.
-    def __init__(self, train_data, k=1, report=True):
+    def __init__(self, train_data, k=1, report=True, weighted=False):
         self.k = k
         self.train_data = train_data
         self.report = report
+        self.weighted = weighted
 

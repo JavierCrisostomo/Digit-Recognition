@@ -12,6 +12,7 @@ def loadTrainData(input_file):
 
 def loadTestData(test_file, true_label=None):
     print test_file
+    #test_data = np.loadtxt(test_file, delimiter=",", skiprows=0)
     test_data = np.loadtxt(test_file, delimiter=",", skiprows=1)
     test_y = None
     if true_label is not None:
@@ -35,14 +36,14 @@ def runKNNCV(input_file, output, folds):
         out.write(str(k))
         out.close()
 
-
-def runKNN(train_file, test_file, true_label, output_file, k):
+def runKNN(train_file, test_file, true_label, output_file, k, weighted):
     train_data = loadTrainData(train_file)
     test_data, test_y = loadTestData(test_file, true_label)
-    test_data = test_data[:, 1:]
+    test_data = test_data[:]
+    #test_data = test_data[:, 1:]
     output = open(output_file, "w")
 
-    knn = KNN.Classifier(train_data, k)
+    knn = KNN.Classifier(train_data, k, weighted)
     results = list()
 
     for i in range(0, test_data.shape[0]):
@@ -54,13 +55,14 @@ def runKNN(train_file, test_file, true_label, output_file, k):
     output.close()
 
     print results
+    print true_label
 
 
 def printUsage():
 
     print "usage: \n" \
           "KNN function train_file output_directory [test_file] [test_y] [k_value] [number_of_folds]\n" \
-          "     function = cv (cross validate), test\n" \
+          "     function = cv (cross validate), test, weighted \n" \
           "     output_direct = location to write results\n" \
           "     test_file (optional if function = cv)\n" \
           "     test_y = results file for test (optional if function = cv)" \
@@ -103,7 +105,12 @@ def main():
                 test_file = sys.argv[5]
                 label_file = sys.argv[6]
                 k = int(sys.argv[7])
-                runKNN(train_file, test_file, label_file, output_file, k)
+                runKNN(train_file, test_file, label_file, output_file, k, False)
+            elif func == "weighted":
+                test_file = sys.argv[5]
+                label_file = sys.argv[6]
+                k = int(sys.argv[7])
+                runKNN(train_file, test_file, label_file, output_file, k, True)
             elif func == "cv":
                 num_folds = int(sys.argv[5])
                 runKNNCV(train_file, output_file, num_folds)
