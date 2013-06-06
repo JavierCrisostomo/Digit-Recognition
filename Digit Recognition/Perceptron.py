@@ -76,4 +76,5 @@ class Classifier:
         X = np.hstack((np.ones((len(x_data), 1)), x_data[:, 1:]))
 
         weights = self._trainSVM(X, y, report, kernel)
-        return self.packModel(weights, kernel)
+        return weights
+        #return self.packModel(weights, kernel)

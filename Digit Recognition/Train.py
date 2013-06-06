@@ -84,8 +84,11 @@ class Trainer:
         threads = dict()
         cores = multiprocessing.cpu_count()
         pool = mp.ThreadPool(processes=cores)
+        
+        trained_model = dict()
         for couple in self.processed_data.keys():
             arg = (self.processed_data[couple], kernel, report, plot)
+            #trained_model[couple] = self._trainSingleClass(self.processed_data[couple], kernel, report, plot)
             result = pool.apply_async(self._trainSingleClass, arg)
             threads[couple] = result
 
@@ -94,13 +97,14 @@ class Trainer:
             trained_model[r] = threads[r].get()
 
         #serialize trained model
+        print trained_model
         if output is not None:
             out = open(output, "w+")
             pickle.dump(trained_model, out)
 
     def _trainSingleClass(self, data, kernel, report, plot):
         perceptron = Perceptron.Classifier()
-        return perceptron.trainModel(data, 1, kernel, 1, report)
+        return perceptron.trainModel(data, kernel, report)
 
 
 
