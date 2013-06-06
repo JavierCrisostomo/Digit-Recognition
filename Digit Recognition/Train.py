@@ -6,15 +6,16 @@ import Kernels
 import sys
 import multiprocessing.pool as mp
 import multiprocessing
+import Perceptron
 
 
 class Trainer:
     processed_data = None
     classifiers = None
 
-    def loadProcessedData(self, input_file):
-        input = open(input_file, "r")
-        self.processed_data = pickle.load(input)
+    def _loadProcessedData(self, input_file):
+        inputf = open(input_file, "r")
+        self.processed_data = pickle.load(inputf)
 
     # Separate data into buckets, keyed by the label
     def processData(self, raw_data, output_file=None, input_file=None):
@@ -24,7 +25,7 @@ class Trainer:
                 output = open(output_file, "w+")
 
             print "***** Separating Data Into Classes..."
-            train_data = self.loadClasses(raw_data)
+            train_data = self._loadClasses(raw_data)
 
             # serialize
             if output_file is not None:
@@ -33,15 +34,15 @@ class Trainer:
 
         else:
             print "***** Loading Data From %s" % input_file
-            input = open(input_file, "r")
-            train_data = pickle.load(input)
+            inputf = open(input_file, "r")
+            train_data = pickle.load(inputf)
 
         print "***** Combining Classes for Training"
-        self.processed_data = self.combineClasses(train_data)
+        self.processed_data = self._combineClasses(train_data)
 
         print "***** Processing Data Complete"
 
-    def loadClasses(self, raw_data):
+    def _loadClasses(self, raw_data):
         train_data = dict()
         for row in raw_data:
             label = row[0]
@@ -54,7 +55,7 @@ class Trainer:
 
         return train_data
 
-    def combineClasses(self, train_data):
+    def _combineClasses(self, train_data):
         pairings = dict()
         for key1 in train_data.keys():
             class1 = train_data[key1]
@@ -63,6 +64,8 @@ class Trainer:
                 if key2 > key1:
                     class2 = train_data[key2]
                     class2[:, 0] = -1
+                    print class1.shape
+                    print class2.shape
                     combined = np.vstack((class1, class2))
 
                     # rows need to be shuffled, otherwise not i.i.d
@@ -83,7 +86,7 @@ class Trainer:
         pool = mp.ThreadPool(processes=cores)
         for couple in self.processed_data.keys():
             arg = (self.processed_data[couple], kernel, report, plot)
-            result = pool.apply_async(self.trainSingleClass, arg)
+            result = pool.apply_async(self._trainSingleClass, arg)
             threads[couple] = result
 
         trained_model = dict()
@@ -95,9 +98,9 @@ class Trainer:
             out = open(output, "w+")
             pickle.dump(trained_model, out)
 
-    def trainSingleClass(self, data, kernel, report, plot):
-        svm = SVM.Classifier()
-        return svm.trainModel(data, 1, kernel, 1, report)
+    def _trainSingleClass(self, data, kernel, report, plot):
+        perceptron = Perceptron.Classifier()
+        return perceptron.trainModel(data, 1, kernel, 1, report)
 
 
 

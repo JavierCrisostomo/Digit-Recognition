@@ -2,13 +2,14 @@ __author__ = 'bdwalker'
 
 import KNN
 import SVM
+import Perceptron
 
 
 class TestModel:
 
     def predictWithModel(self, model, test_data, report=False):
-        svm = SVM.Classifier()
-        predictions = svm.testWithModel(test_data[:, 1:], model)
+        perceptron = Perceptron.Classifier()
+        predictions = perceptron.testWithModel(test_data, model)
         return predictions
 
     def calculateLoss(self, predictions, labels):
