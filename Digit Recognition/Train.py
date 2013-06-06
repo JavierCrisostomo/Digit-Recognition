@@ -96,11 +96,13 @@ class Trainer:
         for r in threads.keys():
             trained_model[r] = threads[r].get()
 
+        perceptron = Perceptron.Classifier()
+        model = perceptron.packModel(trained_model)
         #serialize trained model
-        print trained_model
+
         if output is not None:
             out = open(output, "w+")
-            pickle.dump(trained_model, out)
+            pickle.dump(model, out)
 
     def _trainSingleClass(self, data, kernel, report, plot):
         perceptron = Perceptron.Classifier()

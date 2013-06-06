@@ -69,9 +69,12 @@ def trainPerceptron(train_file, kernel, output_file, dim):
         realKernel = Kernels.exponentialKernel(dim)
     trainer.trainModel(realKernel, True, False, output_file)
 
+# Loads the test data and model, unpacks the model and 
+# initializes the testing framework.
 def runPerceptron(test_file, kernel, output_file, dim, model_file):
     testData = loadTestData(test_file)
     tester = Test.TestModel()
+    perceptron = Perceptron.Classifier()
     realKernel = None
     if kernel == "poly":
         realKernel = Kernels.exactPolyKernel(dim)
@@ -79,10 +82,11 @@ def runPerceptron(test_file, kernel, output_file, dim, model_file):
         realKernel = Kernels.exponentialKernel(dim)
 
     infile = open(model_file, "r")
-    mdoel = pickle.load(infile)
-    tester.predictWithModel(testData, realKernel, True)
+    model = pickle.load(infile)
+    model = perceptron.unpackModel(model)
+    classifications = tester.predictWithModel(model, testData, realKernel, True)
     output = open(output_file, "w+")
-    pickle.dump(classifier, output)
+    pickle.dump(classifications, output)
 
 def printUsage():
 
@@ -103,7 +107,7 @@ def printUsage():
           "     test_file (optional if function = cv, train\n" \
           "     kernel = kernel used with SVM (optional if function = cv)\n" \
           "     number_of_folds = folds to use for cross validation (optional if function = train, test) \n\n" \
-          "Perceptron function train_file output_directory [test_file] [kernel] [number_of_folds]\n" \
+          "Perceptron function train_file output_directory [test_file] [kernel] [number_of_folds] \n" \
           "     function = cv (cross validate), train, test\n" \
           "     train_file = data to train the classifier with\n" \
           "     output_directory = location to write results\n" \

@@ -46,20 +46,21 @@ class Classifier:
     # Method that accepts testing data as an ndarray and a trained model.  It will
     # make predictions for the test data with the trained model and return the predictions
     # in an ndarray.
-    def testWithModel(self, x, model):
-        mistakes, kernel = self.unpackModel(model)
+    def testWithModel(self, x, kernel, model):
+        mistakes = self.unpackModel(model)
         return np.apply_along_axis(self.classify, 1, x, mistakes, kernel)
 
     # Simple helper method to unpack everything in the model.
     def unpackModel(self, model):
-        return model["weights"], model["kernel"]
+        print model
+        return model["weights"]
 
     # Helper method to pack everything into a dictionary that will be needed
     # for testing with the trained model.  It will save all the mistakes needed
     # to make a prediction, the constant C needed for weighting and the kernel
     # used for training which should be identical to the one used for testing.
-    def packModel(self, weights, kernel):
-        return {"weights": weights, "kernel": kernel}
+    def packModel(self, weights):
+        return {"weights": weights}
 
     # Trains the SVM model using the data passed in as x_data.  It will return
     # a trained model that can be used for making predictions on test data.  The
@@ -77,4 +78,3 @@ class Classifier:
 
         weights = self._trainSVM(X, y, report, kernel)
         return weights
-        #return self.packModel(weights, kernel)
