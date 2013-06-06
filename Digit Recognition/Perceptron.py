@@ -46,9 +46,9 @@ class Classifier:
     # Method that accepts testing data as an ndarray and a trained model.  It will
     # make predictions for the test data with the trained model and return the predictions
     # in an ndarray.
-    def testWithModel(self, test_data, model):
+    def testWithModel(self, x, model):
         mistakes, kernel = self.unpackModel(model)
-        return np.apply_along_axis(self.classify, 1, test_data, mistakes, kernel)
+        return np.apply_along_axis(self.classify, 1, x, mistakes, kernel)
 
     # Simple helper method to unpack everything in the model.
     def unpackModel(self, model):
