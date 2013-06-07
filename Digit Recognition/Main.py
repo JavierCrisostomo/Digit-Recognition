@@ -72,7 +72,7 @@ def trainPerceptron(train_file, kernel, output_file, dim):
 # Loads the test data and model, unpacks the model and 
 # initializes the testing framework.
 def runPerceptron(test_file, kernel, output_file, dim, model_file):
-    testData = loadTestData(test_file)
+    testData, testY = loadTestData(test_file)
     tester = Test.TestModel()
     perceptron = Perceptron.Classifier()
     realKernel = None
@@ -86,7 +86,7 @@ def runPerceptron(test_file, kernel, output_file, dim, model_file):
     model = perceptron.unpackModel(model)
     classifications = tester.predictWithModel(model, testData, realKernel, True)
     output = open(output_file, "w+")
-    pickle.dump(classifications, output)
+    output.writelines(classifications)
 
 def printUsage():
 

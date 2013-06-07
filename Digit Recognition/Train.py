@@ -88,13 +88,13 @@ class Trainer:
         trained_model = dict()
         for couple in self.processed_data.keys():
             arg = (self.processed_data[couple], kernel, report, plot)
-            #trained_model[couple] = self._trainSingleClass(self.processed_data[couple], kernel, report, plot)
             result = pool.apply_async(self._trainSingleClass, arg)
             threads[couple] = result
 
         trained_model = dict()
         for r in threads.keys():
             trained_model[r] = threads[r].get()
+            #Stored length 785
 
         perceptron = Perceptron.Classifier()
         model = perceptron.packModel(trained_model)
