@@ -52,8 +52,8 @@ Perceptron. Despite its relative simplicity, we found that KNN was more
 effective than Perceptron in classifying the digits. The nearest neighbors
 algorithm correctly classified 96.857\% of the testing samples on a weighted
 neighbors algorithm which looked at 4 neighbors. Our best Perceptron
-implementation correctly classified 95.67\% of the testing samples using an
-exponential kernel with a $\sigma = 5$. Despite its higher accuracy, the runtime
+implementation correctly classifies 96.3\% of the testing samples using an
+exponential kernel with a $\sigma = 10$. Despite its higher accuracy, the runtime
 of KNN was 8x slower than that of the Perceptron.
 
 \end{abstract}
@@ -71,7 +71,7 @@ The Kaggle data provides two groups of data, 42,000 training samples with labels
 and 28,000 unlabeled testing samples. Each training sample contains a 48 pixel
 by 48 pixel image containing a handwritten number. The image is represented as
 an array of 768 pixel values which represent how dark each pixel of the image
-is. Table 1 is an example of a training sample.
+is. Table 1 is an example of a training data sample.
 
 \begin{table}[ht]
 \textbf{\caption{Subset of Kaggle Data}} % title
@@ -89,14 +89,14 @@ Label & Pixel 77 & Pixel 78 & Pixel 79 \\
 
 \subsection{Overview}
 
-K Nearest Neighbors is a relatively simple algorithm which often gets surprisingly
-good results given its simplicity. Given a testing sample $X$, the algorithm
-looks through all the training samples it has previously seen and finds the
-\textit{K} most similar samples. The algorithm then implements some form of
-voting mechanism among the \textit{K} samples to classify the testing sample as
-a digit 0-9. The voting mechanism can either be as straightforward as selecting the
-majority label, to something more complicated which involves weighting the
-samples based on some distance metric. 
+K Nearest Neighbors is a relatively simple algorithm which often gets
+surprisingly good results given its simplicity. Given a testing sample $X$, the
+algorithm looks through all the training samples it has previously seen and
+finds the \textit{K} most similar samples, known as the nearest neighbors. The
+algorithm then implements some form of a voting mechanism among the \textit{K}
+samples to classify the testing sample as a digit 0-9. The voting mechanism can
+be as straightforward as selecting the majority label, or it can be more
+complex, involving weighting samples based on some distance metric.
 
 \subsection{Implementation Details}
 
@@ -130,7 +130,14 @@ Given the \textit{K} nearest neighbors, the weighted version of the algorithm
 multiplies each label by a weight which indicates how close it is to our testing
 sample. These weights help to emphasize points that are closer to our testing
 sample while reducing the impact further away training points have on
-classifying our testing sample. 
+classifying our testing sample.
+
+The weight function is an inverse distance function of the form:
+
+\begin{center}
+$Weight(TrainY, TrainX, TestX) = \frac{1}{Euclidean(TestX, TrainX)}*TrainY$
+\end{center}
+
 
 \subsection{Cross Validation}
 
@@ -149,14 +156,14 @@ configurations to see which configuration was most accurate.
 \begin{tabular}{c | c c }
 K & Unweighted KNN Error & Weighted KNN Error \\
 \hline
-1 & .077 & .077 \\
-2 & .092 & .092 \\
-3 & .075 & .075 \\
-4 & .078 & .073 \\
-5 & .078 & .075 \\
-10 & .085 & .079 \\
-15 & .095 & .089 \\
-20 & .102 & .098 \\ [1ex]
+1 & 7.7\% & 7.7\% \\
+2 & 9.2\% & 9.2\% \\
+3 & 7.5\% & 7.5\% \\
+4 & 7.8\% & 7.3\% \\
+5 & 7.8\% & 7.5\% \\
+10 & 8.5\% & 7.9\% \\
+15 & 9.5\% & 8.9\% \\
+20 & 10.2\% & 9.8\% \\ [1ex]
 \end{tabular}
 \label{table:nonlin}
 \end{table}
@@ -169,18 +176,18 @@ Our cross validation results suggest that running weighted KNN with $K = 4$
 yields the most successful classification rate. One caveat to this is that our
 cross validation code ran using 5,000 training samples instead of the 42,000
 samples in our full training set. It is possible that data we used to cross
-validate is no representative of the full data set.
+validate is not representative of the full data set.
 
 \subsection{Results}
 
 Our KNN implementation was extremely successful, correctly classifying 96.857\%
-of the testing samples. One downside to it however is the runtime. Training is
+of the testing samples. One downside to it, however, is the runtime. Training is
 near instantaneous since the algorithm simply loads the data into an array. To
 classify a sample the algorithm needs to compute the euclidean distance between
 the testing sample and every training sample. In the case of the full data set
 this is 42,000 samples, each of which has 768 dimensions. As a result, each
-testing sample takes approximately. Altogether it takes close to 8 hours to
-classify all 28,000 testing samples.
+testing sample takes approximately one second to run. Altogether it takes close
+to 8 hours to classify all 28,000 testing samples.
 
 \section{Kernelized Perceptron}
 \subsection{Overview}
@@ -209,7 +216,7 @@ for future classifications.
 
 One problem that needs to be addressed is that a standard perceptron is a binary
 classifier meaning it selects between one of two classes. We resolved this issue
-by training $10 \choose 2 = 45$ classifiers. Each classifier is responsible for
+by training $10 \choose 2$ $=45$ classifiers. Each classifier is responsible for
 classifying between two digits. For example, we would train a perceptron to
 classify between 0 and 1, and a second to classify between 0 and 2, and so
 on. When we classify we vote between all of our trained classifiers and output
@@ -222,7 +229,7 @@ $classify(X) = \sum\limits_{i \in Mistakes}{Y_iK(X_i, X)}$
 \end{center}
 
 The kernel function is represented by $K(X_i, X)$. There are a number of choices
-for this kernel function.
+for this kernel function which we will explore in the next section.
 
 \subsection{Cross Validation for Kernel Selection}
 
@@ -271,30 +278,45 @@ because the polynomial kernel began to overfit the training data.
 
 Finally, the runtime of the perceptron algorithm is a little over an hour. It
 takes approximately 45 minutes to train and about 20 minutes to test the
-data. The faster runtime allowed us to cross validate on the full data set.
+data. The faster runtime allowed us to cross validate on the full data set so
+our cross validation results are more accurate than those we obtained for KNN.
 
 \section{Conclusion}
 Despite its seeming simplicity, we found that KNN was extremely successful
 when classifying data points in the Kaggle set.
 
-\begin{center}
+
+\begin{table}[ht]
+\textbf{\caption{KNN vs. Perceptron on Full Testing Set}}
+\centering
 \begin{tabular}{ c| c c}
-	\hline
-Algorithm & Percent Success & runtime\\
-	\hline
-Nearest Neighbors, $k = 4$   & 96.857\% & $\sim$8 hours\\
-Perceptron   & 96.300\%  & $\sim$1 hour\\
+  \hline
+  Algorithm & Percent Success & runtime\\
+  \hline
+  Nearest Neighbors, $k = 4$   & 96.857\% & $\sim$8 hours\\
+  Perceptron   & 96.300\%  & $\sim$1 hour\\
 \end{tabular}
-\end{center}
+\end{table}
 
 Table 4 summarizes the accuracy and runtimes of weighted KNN with $K = 4$ and
 perceptron with the polynomial kernel and $d = 10$. KNN is clearly more
-accurate, however because perceptron is 8x faster and almost as accurate, there
-could be many cases where it is a better choice.
+accurate, however because perceptron is nearly 8x faster, there could be many
+cases where it is a better choice.
 
 In addition to being faster, perceptron likely has a lower memory
 footprint. While KNN must store every sample in the training set, perceptron
-only stores mistakes which will be a subset of the entire training set.
+only stores mistakes which will be a subset of the training set.
+
+One reason why KNN may have been so successful in this trial is due to the large
+training data set and small number of classes to classify. With only 10 posible
+classifications, there are likely around 4,2000 training samples of each
+number. The odds of at least a few of those being similar to the test image
+intuitively seem high.
+
+An explanation for the perceptron algorithm being less successful than KNN is
+that it may have overfit our training data because there was no
+regularization. This could explain why our polynomial kernel did worse with a
+higher dimension kernel function.
 
 \section{Future Work}
 There are three specific expansions to our work we would have liked to explore
@@ -303,7 +325,7 @@ had we had time.
 \begin{itemize}
 \item Expanded cross validation for KNN using the full training set. This would
   help validate that the weighted voting algorithm with $K = 4$ leads to the
-  most accurate. 
+  most accurate classification. 
 \item More kernels and a greater assortment of $\sigma$ and $d$ values to
   see if we can increase the effectiveness of the perceptron algorithm. 
 \item An SVM implementation which regularizes the data to avoid overfitting. If
@@ -318,8 +340,6 @@ had we had time.
 \bibliographystyle{unsrt}
 \bibliography{references}	
 \endgroup
-
-
 
 
 \end{document}
