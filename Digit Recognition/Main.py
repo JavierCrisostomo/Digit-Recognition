@@ -12,20 +12,20 @@ import pickle
 def loadTrainData(input_file):
     return np.loadtxt(input_file, delimiter=",", skiprows=1)
 
-def loadTestData(test_file, true_label=None):
-    test_data = np.loadtxt(test_file, delimiter=",", skiprows=1)
+def loadTestData(test_file, true_label="./uci_data/test/Y_test.txt"):
+    test_data = np.loadtxt(test_file)
     test_y = None
     if true_label is not None:
         print true_label
-        test_y = np.loadtxt(true_label, delimiter=",", skiprows=1)
+        test_y = np.loadtxt(true_label)
     return test_data, test_y
 
-def runSVM():
-    trainer = Train.Trainer()
-    trainer.processData(train_data, None, "./trained_model.csv")
-    kernel = Kernels.exactPolyKernel(5)
-    trainer.trainModel(kernel, True, False, "./trained_model.csv")
-    pass
+def loadUCITrainData(input_x, input_y):
+    train_x = np.loadtxt(input_x)
+    train_y = np.atleast_2d(np.loadtxt(input_y)).T
+    train_data = np.hstack((train_y, train_x))
+    return train_data
+
 
 def runKNNCV(input_file, output, folds):
     train_data = loadTrainData(input_file)
@@ -59,9 +59,9 @@ def runKNN(train_file, test_file, output_file, k, weighted):
 
     print results
 
-def trainPerceptron(train_file, kernel, output_file, dim):
+def trainPerceptron(train_file, kernel, output_file, dim, train_y = None):
     trainer = Train.Trainer()
-    trainer.processData(loadTrainData(train_file))
+    trainer.processData(loadUCITrainData(train_file, "./uci_data/train/Y_train.txt"))
     realKernel = None
     if kernel == "poly":
         realKernel = Kernels.exactPolyKernel(dim)
@@ -87,6 +87,19 @@ def runPerceptron(test_file, kernel, output_file, dim, model_file):
     classifications = tester.predictWithModel(model, testData, realKernel, True)
     output = open(output_file, "w+")
     output.writelines(classifications)
+
+    print calculateError(classifications)
+
+
+def calculateError(classifications):
+    label = np.loadtxt("./uci_data/test/Y_test.txt")
+    error = 0.0
+    for i in range(len(classifications)):
+        if int(classifications[i]) != (label[i]):
+            error += 1.0
+    return error / len(classifications)
+
+
 
 def printUsage():
 
