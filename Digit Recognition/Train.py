@@ -52,6 +52,7 @@ class Trainer:
             else:
                 train_data[label] = row
 
+        print len(train_data)
         return train_data
 
     def _combineClasses(self, train_data):
@@ -68,7 +69,6 @@ class Trainer:
                     # rows need to be shuffled, otherwise not i.i.d
                     np.random.shuffle(combined)
                     pairings[(key1, key2)] = combined
-
         return pairings
 
     def trainModel(self, kernel=Kernels.defaultKernel, report=False, plot=False, output=None):
