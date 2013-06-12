@@ -29,3 +29,10 @@ def exponentialKernel(sigma):
         denominator = 2 * sigma ** 2
         return math.exp(-1 * (numerator / denominator))
     return applyKernel
+
+# def exponentialKernel(sigma):
+#     def applyKernel(x_m, x_t):
+#         numerator = np.dot((x_m - x_t), (x_m - x_t))
+#         denominator = 2 * sigma ** 2
+#         return math.exp(-1 * (numerator / denominator))
+#     return applyKernel

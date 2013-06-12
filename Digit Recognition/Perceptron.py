@@ -1,5 +1,4 @@
 __author__ = 'bdwalker'
-
 import numpy as np
 import Kernels
 
@@ -17,7 +16,7 @@ class Classifier:
         #print "Length of x: ", len(x)
         #print "Length of mistakes_x: ", len(mistake_x[0])
 
-        c =  1 if (np.sum(mistake_y * np.apply_along_axis(kernel, 1, mistake_x, x))) > 0 else -1
+        c = 1 if (np.sum(mistake_y * np.apply_along_axis(kernel, 1, mistake_x, x))) > 0 else -1
         return c
 
     # Method to train the model.  It accepts as arguments and ndarray of training data,
@@ -83,4 +82,5 @@ class Classifier:
 
         mistakes = self._trainSVM(x_data[:, 1:], y, report, kernel)
         # Returns length 785
+        print mistakes
         return mistakes

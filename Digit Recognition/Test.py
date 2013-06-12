@@ -7,11 +7,6 @@ import numpy as np
 
 class TestModel:
 
-    def _tallyVotes(self, predictions):
-        lables = [9] * predictions.shape[0]
-        for i in range(predictions.shape[0]):
-            lables[which.predictions[i,:]]
-
     # Passed an unpacked model_dict
     def predictWithModel(self, model_dict, test_data, kernel, report=False):
         perceptron = Perceptron.Classifier()

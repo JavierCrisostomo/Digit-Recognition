@@ -11,7 +11,6 @@ import Perceptron
 
 class Trainer:
     processed_data = None
-    classifiers = None
 
     def _loadProcessedData(self, input_file):
         inputf = open(input_file, "r")
@@ -64,8 +63,6 @@ class Trainer:
                 if key2 > key1:
                     class2 = train_data[key2]
                     class2[:, 0] = -1
-                    print class1.shape
-                    print class2.shape
                     combined = np.vstack((class1, class2))
 
                     # rows need to be shuffled, otherwise not i.i.d
@@ -84,17 +81,22 @@ class Trainer:
         threads = dict()
         cores = multiprocessing.cpu_count()
         pool = mp.ThreadPool(processes=cores)
-        
-        trained_model = dict()
+
+        #trained_model = dict()
         for couple in self.processed_data.keys():
             arg = (self.processed_data[couple], kernel, report, plot)
             result = pool.apply_async(self._trainSingleClass, arg)
             threads[couple] = result
+            #trained_model[couple] = self._trainSingleClass(self.processed_data[couple], kernel, report, plot)
+
+        pool.close()
+        pool.join()
 
         trained_model = dict()
         for r in threads.keys():
-            trained_model[r] = threads[r].get()
-            #Stored length 785
+            thread = threads[r]
+            trained_model[r] = thread.get()
+        #     #Stored length 785
 
         perceptron = Perceptron.Classifier()
         model = perceptron.packModel(trained_model)
