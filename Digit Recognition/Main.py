@@ -7,7 +7,7 @@ import KNNCrossValidation as cv
 import numpy as np
 import Perceptron
 import pickle
-
+import PerceptronCrossValidation
 
 def loadTrainData(input_file):
     return np.loadtxt(input_file, delimiter=",", skiprows=1)
@@ -99,6 +99,8 @@ def calculateError(classifications):
             error += 1.0
     return error / len(classifications)
 
+def perceptronCV(data_file):
+    PerceptronCrossValidation.crossValidate(loadUCITrainData(data_file, "./uci_data/train/Y_train.txt"))
 
 
 def printUsage():
@@ -172,6 +174,8 @@ def main():
                 dim = int(sys.argv[6])
                 model_file = sys.argv[7]
                 runPerceptron(train_file, kernel, output_file, dim, model_file)
+            elif func == "cv":
+                perceptronCV(train_file)
             else:
                 printUsage()
         else:

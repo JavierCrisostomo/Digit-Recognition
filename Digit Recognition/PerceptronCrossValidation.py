@@ -12,14 +12,14 @@ def crossValidate(train_data):
     _trainModel(train_data)
 
 def _trainModel(train_data):
-    dimensions = [1, 3, 7, 8, 13, 15, 20]
+    dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 17, 20, 25]
     trainer = Train.Trainer()
     test_size = int(train_data.shape[0] / 10)
     folds = 10
     pool = mp.Pool(processes=4)
     results = list()
 
-    output = open("./results/cv_results_perceptron.txt", "w+")
+    output = open("./results/uci_cv_results_perceptron.txt", "w+")
     for dim in dimensions:
         args = (test_size, trainer, folds, train_data, dim)
         results.append(pool.apply_async(_crossValidate, args))
@@ -45,7 +45,7 @@ def _crossValidate(test_size, trainer, folds, train_data, dim):
         split_train = np.delete(train_data, range(start, start + test_size), axis=0)
         print "Test Size ", split_test.shape
         trainer.processData(split_train)
-        model_file = "./Model/perceptron_model_poly_" + str(dim)
+        model_file = "./Model/uci_perceptron_model_poly_" + str(dim)
         trainer.trainModel(kernel, True, False, model_file)
         error += _testModel(split_test, split_label, model_file, kernel)
         start += test_size
